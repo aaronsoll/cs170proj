@@ -10,8 +10,8 @@ def solve(tasks, seed):
     """
     
     # HYPERPARAMETERS
-    PPD_WEIGHT = .7
-    DURATION_WEIGHT = .02
+    PPD_WEIGHT = .99
+    DURATION_WEIGHT = .01
     DEADLINE_WEIGHT = 1 - PPD_WEIGHT - DURATION_WEIGHT
     
     priority_func = lambda x: PPD_WEIGHT * x.perfect_benefit / x.duration + DURATION_WEIGHT * (-x.duration) + DEADLINE_WEIGHT * (-x.deadline)
@@ -33,8 +33,8 @@ def solve(tasks, seed):
 
 # Here's an example of how to run your solver.
 if __name__ == '__main__':
-    NUM_TRIALS = 10
-    for trial in NUM_TRIALS:
+    NUM_TRIALS = 1
+    for trial in range(NUM_TRIALS):
         seed = trial
         for folder in ['small/', 'medium/', 'large/']:
             os.mkdir("outputs/" + folder)
