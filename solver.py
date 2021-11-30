@@ -17,7 +17,7 @@ def solve(tasks, seed):
     
     # HYPERPARAMETERS
     NUM_TIMESTEPS = 1440
-    CURR_WEIGHT = .6
+    CURR_WEIGHT = .52
     NEXT_WEIGHT = 1 - CURR_WEIGHT
     
     priority_func = lambda task: task.curr_profit * CURR_WEIGHT - task.next_profit * NEXT_WEIGHT
