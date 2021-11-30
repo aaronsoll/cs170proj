@@ -1,5 +1,11 @@
 from parse import read_input_file, write_output_file
 import os
+import math
+
+def profit(task, start_time):
+    if start_time + task.duration <= task.deadline:
+        return task.perfect_benefit
+    return task.perfect_benefit * math.exp(-.017 * (start_time + task.duration - task.deadline))
 
 def solve(tasks, seed):
     """
@@ -10,24 +16,28 @@ def solve(tasks, seed):
     """
     
     # HYPERPARAMETERS
-    PPD_WEIGHT = .99
-    DURATION_WEIGHT = .01
-    DEADLINE_WEIGHT = 1 - PPD_WEIGHT - DURATION_WEIGHT
+    NUM_TIMESTEPS = 1440
+    CURR_WEIGHT = .6
+    NEXT_WEIGHT = 1 - CURR_WEIGHT
     
-    priority_func = lambda x: PPD_WEIGHT * x.perfect_benefit / x.duration + DURATION_WEIGHT * (-x.duration) + DEADLINE_WEIGHT * (-x.deadline)
-    sorted_tasks = sorted(tasks, key=priority_func, reverse=True)
+    priority_func = lambda task: task.curr_profit * CURR_WEIGHT - task.next_profit * NEXT_WEIGHT
     
     rv = []
-    remaining_time = 1440
-    loop_again = True
-    while loop_again:
-        loop_again = False
-        for task in sorted_tasks:
-            if not task.taken and remaining_time >= task.duration:
-                task.taken = True
-                remaining_time -= task.duration
-                rv.append(task.task_id)
-                loop_again = True
+    time_taken = 0
+    for timestep in range(NUM_TIMESTEPS):
+        curr_time = timestep * 1440 / NUM_TIMESTEPS
+        next_time = (timestep + 1) * 1440 / NUM_TIMESTEPS
+        if time_taken > curr_time:
+            continue
+        for task in tasks:
+            task.curr_profit = profit(task, curr_time)
+            task.next_profit = profit(task, curr_time + 40)
+        while time_taken < next_time and len(tasks) > 0:
+            best_task = max(tasks, key=priority_func)
+            tasks.remove(best_task)
+            if time_taken + best_task.duration <= 1440:
+                time_taken += best_task.duration
+                rv.append(best_task.task_id)
     return rv
 
 
