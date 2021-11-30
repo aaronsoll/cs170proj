@@ -17,10 +17,15 @@ def solve(tasks, seed):
     
     # HYPERPARAMETERS
     NUM_TIMESTEPS = 1440
-    CURR_WEIGHT = .52
-    NEXT_WEIGHT = 1 - CURR_WEIGHT
+    BEFORE_SLOPE = .01
+    AFTER_SLOPE = .02
     
-    priority_func = lambda task: task.curr_profit * CURR_WEIGHT - task.next_profit * NEXT_WEIGHT
+    def priority_func(task, curr_time):
+        if task.deadline >= curr_time:
+            multiplier = 1 - AFTER_SLOPE * (curr_time - task.deadline)
+        else:
+            multiplier = 1 - BEFORE_SLOPE * (task.deadline - curr_time)
+        return multiplier * task.perfect_benefit / task.duration
     
     rv = []
     time_taken = 0
@@ -33,7 +38,7 @@ def solve(tasks, seed):
             task.curr_profit = profit(task, curr_time)
             task.next_profit = profit(task, curr_time + 40)
         while time_taken < next_time and len(tasks) > 0:
-            best_task = max(tasks, key=priority_func)
+            best_task = max(tasks, key=lambda task: priority_func(task, curr_time + task.duration))
             tasks.remove(best_task)
             if time_taken + best_task.duration <= 1440:
                 time_taken += best_task.duration
@@ -41,7 +46,6 @@ def solve(tasks, seed):
     return rv
 
 
-# Here's an example of how to run your solver.
 if __name__ == '__main__':
     NUM_TRIALS = 1
     for trial in range(NUM_TRIALS):
