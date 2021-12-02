@@ -26,8 +26,7 @@ class Task:
         self.deadline = deadline
         self.duration = duration
         self.perfect_benefit = perfect_benefit
-        self.curr_profit = None
-        self.next_profit = None
+        self.copy_num = 0
         
     def get_task_id(self) -> int:
         """ 

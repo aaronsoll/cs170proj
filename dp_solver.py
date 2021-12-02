@@ -3,34 +3,6 @@ import os
 import math
 import Task
 import heapq
-
-# def solve_simple_dp(tasks, seed):
-#     """
-#     Args:
-#         tasks: list[Task], list of igloos to polish
-#     Returns:
-#         output: list[Int] of igloos in order of polishing  
-#     """
-    
-#     tasks = sorted(tasks, lambda task: task.deadline)
-#     n = len(tasks)
-#     W = 1440
-    
-#     K = [[None for w in range(W)] for j in range(n)]
-#     for w in range(W):
-#         K[w][0] = 0
-#     for j in range(n):
-#         K[0][j] = 0
-        
-#     for j in range(1, n + 1):
-#         for w in range(1, W + 1):
-#             if tasks[j].duration > w:
-#                 K[w][j] = K[w][j - 1]
-#             elif tasks[j].:
-                
-#             else:
-#                 K[w][j] = max(K[w][j - 1], K[w - tasks[j].duration][j - 1] + tasks[j].perfect_benefit)
-#     return K[W, n]
     
 def dp_hard_deadline_solver(tasks):
     tasks = sorted(tasks, key=lambda task: task.deadline)
@@ -41,13 +13,18 @@ def dp_hard_deadline_solver(tasks):
     rv = []
     curr_time_taken = 0
     heap = []
+    used = set() # make sure to implement
     for task in tasks:
         if task.duration > task.deadline:
             continue
-        elif curr_time_taken + task.duration <= task.deadline:
-            heapq.heappush(heap, (priority_func(task), counter,  task)) # add middle element with ever increasing counter
+        elif task.task_id in used:
+            continue
+        elif curr_time_taken + task.duration <= task.deadline: # ADD TASK
+            heapq.heappush(heap, (priority_func(task), counter,  task))
             counter += 1
             rv.append(task.task_id)
+            curr_time_taken += task.duration
+            used.add(task.task_id)
         else:
             popped_off_duration = 0
             lost_profit = 0
@@ -56,17 +33,36 @@ def dp_hard_deadline_solver(tasks):
                 popped.append(heapq.heappop(heap)) # can optimize by peaking, not popping
                 popped_off_duration += popped[-1][2].duration
                 lost_profit += popped[-1][2].perfect_benefit
-            if lost_profit / popped_off_duration < task.perfect_benefit / task.duration:
-                for id in popped:
-                    rv.remove(id) 
+            if lost_profit / popped_off_duration < task.perfect_benefit / task.duration: # ADD TASK AND REMOVE EXISTING ONES
+                for tup in popped:
+                    rv.remove(tup[2].task_id)
+                    used.remove(tup[2].task_id)
+                curr_time_taken -= popped_off_duration 
+                curr_time_taken += task.duration
                 rv.append(task.task_id)
                 heapq.heappush(heap, (priority_func(task), counter, task))
+                used.add(task.task_id)
                 counter += 1
-            else:
+            else: # DON'T ADD TASK
                 for replace in popped:
-                    heapq.heappush(heap, (priority_func(replace), counter, replace))
-                    counter += 1
+                    heapq.heappush(heap, replace)
     return rv
+
+def solver(tasks):
+    COPY_DIST = 1
+    NUM_COPIES = 1440
+    
+    new_tasks = tasks.copy()
+    for task in tasks:
+        for copy_num in range(1, NUM_COPIES + 1):
+            new_deadline = task.deadline + copy_num * COPY_DIST
+            if new_deadline > 1440:
+                continue
+            new_payout = task.get_late_benefit(copy_num * COPY_DIST)
+            new_task = Task.Task(task.task_id, new_deadline, task.duration, new_payout)
+            new_task.copy_num = copy_num
+            new_tasks.append(new_task)
+    return dp_hard_deadline_solver(new_tasks)
     
 
 
@@ -81,5 +77,5 @@ if __name__ == '__main__':
                 full_input_path = 'inputs/' + folder + input_path
                 output_path = 'outputs/' + folder + input_path[:-3] + '.out'
                 tasks = read_input_file(full_input_path)
-                output = dp_hard_deadline_solver(tasks)
+                output = solver(tasks)
                 write_output_file(output_path, output)
