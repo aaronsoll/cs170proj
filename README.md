@@ -1,17 +1,6 @@
 # CS 170 Project Fall 2021
 
-Take a look at the project spec before you get started!
-
-Requirements:
-
-Python 3.6+
-
-Files:
-- `parse.py`: functions to read/write inputs and outputs
-- `solver.py`: where you should be writing your code to solve inputs
-- `Task.py`: contains a class that is useful for processing inputs
-
-When writing inputs/outputs:
-- Make sure you use the functions `write_input_file` and `write_output_file` provided
-- Run the functions `read_input_file` and `read_output_file` to validate your files before submitting!
-- These are the functions run by the autograder to validate submissions
+### How to run the solver:
+1. Make sure the `cs170proj` folder contains and folder titled  `inputs` and a folder titled `outputs`, and that each of these two folder have subfolders titled `small`, `medium`, and `large`. Within each subfolder in `inputs` should be the input files that are to be run through the algorithm.
+2. Make sure solver.py is located in `cs170proj`, and run it to generate the output files for each input file in `inputs`. Existing files in `outputs` may be overwritten!
+3. Hyperparameters such as `COPY_DIST` and `NUM_COPIES` can be edited to improve runtime at the expense of performance.
